@@ -1,5 +1,5 @@
 # USAGE
-# python real_time_object_detection.py --prototxt MobileNetSSD_deploy.prototxt.txt --model MobileNetSSD_deploy.caffemodel
+# python real_time_object_detection_2.py --prototxt MobileNetSSD_deploy.prototxt.txt --model MobileNetSSD_deploy.caffemodel
 
 # import the necessary packages
 from imutils.video import VideoStream
@@ -9,6 +9,11 @@ import argparse
 import imutils
 import time
 import cv2
+
+file = open('number.txt', 'r')
+number = int(file.read())
+# print(number)
+file.close()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -21,6 +26,8 @@ ap.add_argument("-c", "--confidence", type=float, default=0.2,
 ap.add_argument("-v", "--video_source", type=int, default=0,
 	help="video source (default = 0, external usually = 1)")
 args = vars(ap.parse_args())
+
+
 
 # initialize the list of class labels MobileNet SSD was trained to
 # detect, then generate a set of bounding box colors for each class
@@ -79,9 +86,6 @@ while True:
 			label = "{}: {:.2f}%".format(CLASSES[idx],
 				confidence * 100)
 			print("[INFO] {}".format(label))
-			label_to_generate_alarm = CLASSES[idx]
-			if label_to_generate_alarm == "person":
-				print("Generate Alarm")
 
 			cv2.rectangle(frame, (startX, startY), (endX, endY),
 				COLORS[idx], 2)
@@ -89,12 +93,21 @@ while True:
 			cv2.putText(frame, label, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
+			label_to_generate_alarm = CLASSES[idx]
+			if label_to_generate_alarm == "person":
+				print("Generate Alarm")
+				result = cv2.imwrite(r'persons\human{}.png'.format(number), frame)
+				number += 1
+
 	# show the output frame
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
 
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
+		file2 = open('number.txt', 'w')
+		file2.write(str(number))
+		file2.close()
 		break
 
 	# update the FPS counter
